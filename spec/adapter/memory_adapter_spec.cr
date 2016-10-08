@@ -5,15 +5,12 @@ container = DataMapper::Container.new(DataMapper::MemoryAdapter, "memory://test"
 userRepo = UserRepo.new(container)
 
 describe DataMapper do
-  
   it "should create an entity" do
-
     user = userRepo.create(name: "Username", pass: "pass")
 
     user.id.should(eq(1))
     user.name.should(eq("Username"))
     user.pass.should(eq("pass"))
-
   end
 
   it "should get the user" do
@@ -25,5 +22,4 @@ describe DataMapper do
       user.pass.should(eq("pass"))
     end
   end
-
 end

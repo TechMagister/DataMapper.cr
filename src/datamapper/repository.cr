@@ -1,19 +1,15 @@
 module DataMapper
-  
   class Repository(T)
-    
     alias Config = Hash(Symbol, String)
-    
     @model : T.class
     @config : Config
-    
     property :config
-    
+
     def initialize(@container : DataMapper::Container, @model = T)
-			@config = Config.new
+      @config = Config.new
       @config[:storage] = @model.to_s.downcase
     end
-    
+
     def create(**fields)
       id = @container.command(:create, self, **fields)
       model = @model.new
@@ -29,7 +25,5 @@ module DataMapper
         model
       end
     end
-    
   end
-  
 end
