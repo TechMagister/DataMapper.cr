@@ -1,13 +1,25 @@
 require "json"
 
 module DataMapper
+  macro memory_adapter(properties)
+
+    def initialize(%fields : JSON::Type)
+      if %fields.is_a? Hash(String, JSON::Type)
+        {% for name, opts in properties %}
+          self.{{name.id}} = if (f=%fields["{{name.id}}"]?) && f.is_a?({{opts[:type]}}); f end
+        {% end %}
+      end
+    end
+
+  end
+
   class MemoryAdapter < Adapter
-    alias Store = Hash(Int32, Hash(String, JSON::Type))
+    alias Store = Hash(Int64, Hash(String, JSON::Type))
     alias Storage = Hash(String, Store)
     alias DataBase = Hash(String, Storage)
 
     @@databases = DataBase.new
-    @@actual_id = 0
+    @@actual_id : Int64 = 0i64
     @db_name : String
 
     def initialize(@uri : String)
@@ -21,16 +33,18 @@ module DataMapper
 
     def command(cmd : Symbol, repo : Repository, **opts)
       case cmd
-      when :get    then get(repo, **opts)
-      when :create then create(repo, **opts)
+      when :get  then get(repo, **opts)
+      when :save then save(repo, **opts)
+      else
+        raise Exception.new("Invalid command")
       end
     end
 
-    def create(repo : Repository, **fields)
+    def save(repo : Repository, **fields) : Int64
       @@actual_id += 1
       hash = Hash(String, JSON::Type).new
       fields.each do |key, value|
-        hash[key.to_s] = value
+        hash[key.to_s] = value.as JSON::Type if value.is_a? JSON::Type
       end
       @@databases[@db_name][repo.config[:storage]] ||= Store.new
       @@databases[@db_name][repo.config[:storage]][@@actual_id] = hash
@@ -39,12 +53,14 @@ module DataMapper
 
     def get(repo : Repository, **fields)
       if id = fields[:id]?
-        @@databases[@db_name][repo.config[:storage]][id]
+        obj = @@databases[@db_name][repo.config[:storage]][id]
+        obj["id"] = id if id.is_a? Int64
+        obj
       end
     end
 
     def commands : Array(Symbol)
-      [:create, :get]
+      [:save, :get]
     end
   end
 end

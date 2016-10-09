@@ -5,3 +5,9 @@ authors:
   - Arnaud Fernandés <arnaud.fernandes@laposte.net>
 
 license: MIT
+
+dependencies:
+  db:
+    github: crystal-lang/crystal-db
+  sqlite3:
+    github: crystal-lang/crystal-sqlite3

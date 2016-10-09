@@ -16,30 +16,7 @@ dependencies:
 
 ## Usage
 
-
-```crystal
-require "datamapper"
-
-class User
-  DataMapper.map({
-      :name => {:type => String?},
-      :pass => {:type => String?}
-      })
-end
-
-class UserRepo < DataMapper::Repository(User)
-end
-
-container = DataMapper::Container.new(DataMapper::MemoryAdapter, "memory://test")
-
-userRepo = UserRepo.new(container)
-
-user = userRepo.create(name: "Username", pass: "pass") # User(id: 1, name: "Username", pass: "pass")
-user = userRepo.get(1) # User(id: 1, name: "Username", pass: "pass")
-```
-
-
-TODO: Write usage instructions here
+Subject to a lot of changes, see spec for now.
 
 ## Development
 

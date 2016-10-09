@@ -2,9 +2,10 @@ require "spec"
 require "../src/datamapper"
 
 class User
-  DataMapper.map({
-    :name => {:type => String?},
-    :pass => {:type => String?},
+  DataMapper.map({:sqlite, :memory}, {
+    :id   => {:type => Int64, :nilable => true},
+    :name => {:type => String, :nilable => true},
+    :pass => {:type => String, :nilable => true},
   })
 end
 

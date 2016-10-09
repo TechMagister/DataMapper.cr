@@ -1,10 +1,14 @@
 require "../spec_helper"
 
-container = DataMapper::Container.new(DataMapper::MemoryAdapter, "memory://test")
+container = DataMapper::Container.new(DataMapper::SqliteAdapter, "sqlite3:./spec/test.db")
 
 userRepo = UserRepo.new(container)
 
-describe DataMapper::MemoryAdapter do
+describe DataMapper::SqliteAdapter do
+  it "should create the table" do
+    userRepo.create.should be_true
+  end
+
   it "should save an entity" do
     user = userRepo.save(name: "Username", pass: "pass")
     user.should_not be_nil
@@ -24,4 +28,18 @@ describe DataMapper::MemoryAdapter do
       user.pass.should(eq("pass"))
     end
   end
+
+  #it "should update the user" do
+  #  if user = userRepo.get(1)
+  #    user.name = "NewUsername"
+  #    userRepo.update user
+  #  end
+
+  #  updated_user = userRepo.get(1)
+  #  updated_user.should_not be_nil
+
+  #  if updated_user
+  #    updated_user.name.should eq("NewUsername")
+  #  end
+  #end
 end

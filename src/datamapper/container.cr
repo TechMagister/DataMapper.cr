@@ -13,6 +13,8 @@ module DataMapper
     def command(cmd : Symbol, repo : Repository, **opts)
       if @adapter.commands.includes?(cmd)
         @adapter.command(cmd, repo, **opts)
+      else
+        raise Exception.new("Invalid command : " + cmd.to_s)
       end
     end
   end

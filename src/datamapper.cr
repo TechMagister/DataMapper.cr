@@ -1,32 +1,49 @@
 require "./datamapper/*"
 
 module DataMapper
-  macro map(args)
+  # @see crystal-db : /src/db/mapping.cr
+  macro map(adapters, properties)
 
-    @id : Int32?
+    {% for key, value in properties %}
+      {% properties[key] = {type: value} unless value.is_a?(HashLiteral) || value.is_a?(NamedTupleLiteral) %}
+    {% end %}
 
-    getter :id
+    {% for key, value in properties %}
+      @{{key.id}} : {{value[:type]}} {{ (value[:nilable] ? "?" : "").id }}
 
-    # arguments
-    {% for name, opts in args %}
-      @{{name.id}} : {{opts[:type]}}
-      property :{{name.id}}
-  	{% end %}
+      def {{key.id}}=(_{{key.id}} : {{value[:type]}} {{ (value[:nilable] ? "?" : "").id }})
+        @{{key.id}} = _{{key.id}}
+      end
 
-    def from_orm(@id, **fields)
-      {% for name, opts in args %}
-        self.{{name.id}} = fields[:{{name.id}}]?
-  		{% end %}
-      fields
+      def {{key.id}}
+        @{{key.id}}
+      end
+    {% end %}
+
+    def initialize(
+      {% for name, opts in properties %}
+        @{{name.id}} : {{opts[:type]}},
+      {% end %}
+    )
     end
 
-    def from_orm(@id, fields : Hash)
-      {% for name, opts in args %}
-        self.{{name.id}} = if (f = fields["{{name.id}}"]?) && (field = f.as? {{opts[:type]}})
-          field
-        end
-  		{% end %}
+    def initialize(
+      {% for name, opts in properties %}
+        {% if !opts[:nilable] %}
+          @{{name.id}} : {{opts[:type]}},
+        {% end %}
+      {% end %}
+    )
     end
+
+    {% for adatper in adapters %}
+      DataMapper.{{adatper.id}}_adapter({{properties}})
+    {% end %}
+
+    def self.fields
+      {{properties}}
+    end
+
 
   end
 end
